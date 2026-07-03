@@ -12,16 +12,22 @@ const logger = require('./logger');
 let sequelize;
 
 if (config.db.dialect === 'sqlite') {
-  const storagePath = path.resolve(__dirname, '../../', config.db.storage);
-  const dir = path.dirname(storagePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  // `:memory:` runs an ephemeral in-memory database (used in tests).
+  const isMemory = config.db.storage === ':memory:';
+  let storagePath = config.db.storage;
+
+  if (!isMemory) {
+    storagePath = path.resolve(__dirname, '../../', config.db.storage);
+    const dir = path.dirname(storagePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
   }
 
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: storagePath,
-    logging: (msg) => logger.debug(msg),
+    logging: config.env === 'test' ? false : (msg) => logger.debug(msg),
   });
 } else {
   sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {

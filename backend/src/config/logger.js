@@ -37,6 +37,7 @@ const logger = winston.createLogger({
     }),
   ],
   exitOnError: false,
+  silent: config.env === 'test',
 });
 
 // A stream so morgan can pipe HTTP logs through winston.
