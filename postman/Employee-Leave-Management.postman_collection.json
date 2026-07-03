@@ -1,0 +1,202 @@
+{
+  "info": {
+    "name": "Employee Leave Management System",
+    "description": "REST API collection for the Employee Leave Management System. Set {{baseUrl}} and run 'Login' first — it stores {{accessToken}} automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "leaveId", "value": "1" },
+    { "key": "employeeId", "value": "2" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Manager)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "}",
+                  "pm.test('login ok', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"manager@company.com\",\n  \"password\": \"Password123!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login (Employee)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data) { pm.collectionVariables.set('accessToken', res.data.accessToken); pm.collectionVariables.set('refreshToken', res.data.refreshToken); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"employee@company.com\",\n  \"password\": \"Password123!\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Current User (me)",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] } }
+        },
+        {
+          "name": "Logout",
+          "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] } }
+        }
+      ]
+    },
+    {
+      "name": "Leaves (Employee)",
+      "item": [
+        {
+          "name": "Apply for Leave",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"leaveType\": \"casual\",\n  \"startDate\": \"2026-07-20\",\n  \"endDate\": \"2026-07-22\",\n  \"reason\": \"Family function\"\n}" },
+            "url": { "raw": "{{baseUrl}}/leaves", "host": ["{{baseUrl}}"], "path": ["leaves"] }
+          }
+        },
+        {
+          "name": "My Leaves (filter/paginate)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/leaves?status=pending&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaves"],
+              "query": [
+                { "key": "status", "value": "pending" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Leave by Id",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/leaves/{{leaveId}}", "host": ["{{baseUrl}}"], "path": ["leaves", "{{leaveId}}"] } }
+        },
+        {
+          "name": "Edit Pending Leave",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Updated reason\"\n}" },
+            "url": { "raw": "{{baseUrl}}/leaves/{{leaveId}}", "host": ["{{baseUrl}}"], "path": ["leaves", "{{leaveId}}"] }
+          }
+        },
+        {
+          "name": "Cancel Pending Leave",
+          "request": { "method": "DELETE", "url": { "raw": "{{baseUrl}}/leaves/{{leaveId}}", "host": ["{{baseUrl}}"], "path": ["leaves", "{{leaveId}}"] } }
+        },
+        {
+          "name": "Employee Dashboard Stats",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/leaves/stats/summary", "host": ["{{baseUrl}}"], "path": ["leaves", "stats", "summary"] } }
+        }
+      ]
+    },
+    {
+      "name": "Manager",
+      "item": [
+        {
+          "name": "Pending Leaves",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/manager/pending-leaves", "host": ["{{baseUrl}}"], "path": ["manager", "pending-leaves"] } }
+        },
+        {
+          "name": "All Leaves",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/manager/leaves", "host": ["{{baseUrl}}"], "path": ["manager", "leaves"] } }
+        },
+        {
+          "name": "Approve Leave",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"managerComments\": \"Approved\"\n}" },
+            "url": { "raw": "{{baseUrl}}/manager/leaves/{{leaveId}}/approve", "host": ["{{baseUrl}}"], "path": ["manager", "leaves", "{{leaveId}}", "approve"] }
+          }
+        },
+        {
+          "name": "Reject Leave",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"managerComments\": \"Insufficient balance for this period\"\n}" },
+            "url": { "raw": "{{baseUrl}}/manager/leaves/{{leaveId}}/reject", "host": ["{{baseUrl}}"], "path": ["manager", "leaves", "{{leaveId}}", "reject"] }
+          }
+        },
+        {
+          "name": "Employee Leave History",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/manager/employees/{{employeeId}}/leaves", "host": ["{{baseUrl}}"], "path": ["manager", "employees", "{{employeeId}}", "leaves"] } }
+        },
+        {
+          "name": "Manager Dashboard Stats",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/manager/stats/summary", "host": ["{{baseUrl}}"], "path": ["manager", "stats", "summary"] } }
+        }
+      ]
+    },
+    {
+      "name": "Employees (Manager)",
+      "item": [
+        {
+          "name": "List / Search Employees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/employees?search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"],
+              "query": [{ "key": "search", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Get Employee by Id",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/employees/{{employeeId}}", "host": ["{{baseUrl}}"], "path": ["employees", "{{employeeId}}"] } }
+        }
+      ]
+    }
+  ]
+}
