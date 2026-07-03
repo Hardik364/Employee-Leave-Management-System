@@ -1,0 +1,33 @@
+# Orchestrates the backend API and the frontend (served via nginx).
+# Usage: docker compose up --build
+#   Frontend -> http://localhost:8080
+#   Backend  -> http://localhost:5000
+services:
+  backend:
+    build: ./backend
+    container_name: leavems-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DB_DIALECT=sqlite
+      - DB_STORAGE=./data/leave_management.sqlite
+      - JWT_SECRET=change_me_in_production
+      - JWT_REFRESH_SECRET=change_me_too_in_production
+      - CLIENT_URL=http://localhost:8080
+    volumes:
+      - backend_data:/app/data
+    ports:
+      - "5000:5000"
+    # Seed the database on first boot, then start the server.
+    command: sh -c "node src/seed/seed.js && node src/server.js"
+
+  frontend:
+    build: ./frontend
+    container_name: leavems-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  backend_data:
