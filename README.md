@@ -1,5 +1,8 @@
 # Employee Leave Management System
 
+[![CI](https://github.com/Hardik364/Employee-Leave-Management-System/actions/workflows/ci.yml/badge.svg)](https://github.com/Hardik364/Employee-Leave-Management-System/actions/workflows/ci.yml)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
 A full-stack **Employee Leave Management System (MVP)** that lets employees submit
 and track leave requests while managers review, approve, or reject them — replacing
 manual email/spreadsheet workflows with a centralized, role-based application.
@@ -132,6 +135,26 @@ npm run dev       # start UI on http://localhost:5173
 2. Start the frontend (`npm run dev` in `frontend/`).
 3. Open http://localhost:5173 and log in with a sample account below.
 
+### Run with Docker (optional)
+The whole stack can be run with Docker — no local Node required:
+
+```bash
+docker compose up --build
+# Frontend -> http://localhost:8080
+# Backend  -> http://localhost:5000  (seeded automatically on first boot)
+```
+
+### Testing
+Backend integration tests (Jest + Supertest, in-memory SQLite):
+
+```bash
+cd backend
+npm test
+```
+
+Covers authentication, RBAC, validation, and the full leave lifecycle
+(apply → edit → approve/reject). CI runs these on every push via GitHub Actions.
+
 ## API Documentation
 - **Swagger UI:** http://localhost:5000/api/docs (interactive)
 - **Postman:** import [`postman/Employee-Leave-Management.postman_collection.json`](postman/)
@@ -144,6 +167,21 @@ After running `npm run seed`:
 |----------|------------------------|----------------|
 | Manager  | manager@company.com    | Password123!   |
 | Employee | employee@company.com   | Password123!   |
+
+## Bonus Features Implemented
+- ✅ **JWT Refresh Tokens** — silent token refresh via an Axios interceptor
+- ✅ **Role-Based Access Control (RBAC)** — enforced on both API and UI
+- ✅ **Pagination** — on leave history, pending approvals, and employees
+- ✅ **Search & Filtering** — by status, leave type, reason, and employee
+- ✅ **Docker Support** — Dockerfiles + `docker-compose.yml`
+- ✅ **Unit / Integration Testing** — Jest + Supertest
+- ✅ **GitHub Actions (CI)** — automated test + build pipeline
+- ✅ **Leave Duration Calculation** — inclusive day count on forms/details
+- ✅ **Mobile Responsive Design** — Tailwind responsive layouts
+- ✅ **Dark Mode** — persisted theme toggle
+- ✅ **API Rate Limiting** — `express-rate-limit` on the API surface
+
+For deeper design notes, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Assumptions
 - A Manager can review requests from any employee (single-team MVP scope).
